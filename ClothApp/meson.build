@@ -11,6 +11,7 @@ glu_dep = cc.find_library('glu32', required: true)
 executable(
     'ClothApp',
     [
+        'main.cpp',
         'app.cpp',
         'MassSpringSolver.cpp',
         'Mesh.cpp',
