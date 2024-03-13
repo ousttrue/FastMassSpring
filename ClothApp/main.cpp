@@ -3,10 +3,10 @@
 #include "UserInteraction.h"
 #include "app.h"
 #include <GL/freeglut.h>
-#include <iostream>
 
 // Window
-static int g_windowWidth = 640, g_windowHeight = 640;
+static int g_windowWidth = 640;
+static int g_windowHeight = 640;
 
 // Animation
 static const int g_fps = 60; // frames per second  | 60
@@ -16,7 +16,9 @@ static const int g_animation_timer =
     (int)((1.0f / g_fps) * 1000 - g_frame_time);
 
 static bool g_mouseClickDown = false;
-static bool g_mouseLClickButton, g_mouseRClickButton, g_mouseMClickButton;
+static bool g_mouseLClickButton;
+static bool g_mouseRClickButton;
+static bool g_mouseMClickButton;
 static int g_mouseClickX;
 static int g_mouseClickY;
 
@@ -30,17 +32,17 @@ static const float g_camera_distance = 4.2f;
 // Constants
 static const float PI = glm::pi<float>();
 
-static void initScene(const SystemParam &param) {
+static void updateProjection() {
+  g_ProjectionMatrix = glm::perspective(
+      PI / 4.0f, g_windowWidth * 1.0f / g_windowHeight, 0.01f, 1000.0f);
+}
+
+static void initCamera(const SystemParam &param) {
   g_ModelViewMatrix =
       glm::lookAt(glm::vec3(0.618, -0.786, 0.3f) * g_camera_distance,
                   glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
       glm::translate(glm::mat4(1), glm::vec3(0.0f, 0.0f, param.w / 4));
   updateProjection();
-}
-
-static void updateProjection() {
-  g_ProjectionMatrix = glm::perspective(
-      PI / 4.0f, g_windowWidth * 1.0f / g_windowHeight, 0.01f, 1000.0f);
 }
 
 void reshape(int w, int h) {
@@ -49,6 +51,8 @@ void reshape(int w, int h) {
   glViewport(0, 0, w, h);
   updateProjection();
 }
+
+std::shared_ptr<Demo> g_tmp;
 
 void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickX = x;
@@ -68,20 +72,17 @@ void mouse(const int button, const int state, const int x, const int y) {
   // TODO: move to UserInteraction class: add renderer member variable
   // pick point
   if (g_mouseLClickButton) {
-    UI->setModelview(g_ModelViewMatrix);
-    UI->setProjection(g_ProjectionMatrix);
-    UI->grabPoint(g_mouseClickX, g_mouseClickY);
-  } else
-    UI->releasePoint();
+    g_tmp->UI->setModelview(g_ModelViewMatrix);
+    g_tmp->UI->setProjection(g_ProjectionMatrix);
+    g_tmp->UI->grabPoint(g_mouseClickX, g_mouseClickY);
+  } else {
+    g_tmp->UI->releasePoint();
+  }
 }
 
-// G L U T  C A L L B A C K S
-// //////////////////////////////////////////////////////
 void display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
-
-  checkGlErrors();
+  //
+  g_tmp->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
 }
 
 void motion(const int x, const int y) {
@@ -93,56 +94,33 @@ void motion(const int x, const int y) {
     // glm::vec3 uy(g_ModelViewMatrix * glm::vec4(0, 1, 0, 0));
     glm::vec3 ux(0, 1, 0);
     glm::vec3 uy(0, 0, -1);
-    UI->movePoint(0.01f * (dx * ux + dy * uy));
+    g_tmp->UI->movePoint(0.01f * (dx * ux + dy * uy));
   }
 
   g_mouseClickX = x;
   g_mouseClickY = g_windowHeight - y - 1;
 }
 
-static void initGlutState(int argc, char **argv) {
+int main(int argc, char **argv) {
+  SystemParam param = {};
+
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowSize(g_windowWidth, g_windowHeight);
   glutCreateWindow("Cloth App");
+  glewInit();
+  g_tmp = std::make_shared<Demo>(param);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
-}
 
-int main(int argc, char **argv) {
-  SystemParam param = {};
-
-  try {
-    initGlutState(argc, argv);
-    glewInit();
-    initGLState();
-
-    initShaders();
-    initCloth(param);
-    initScene(param);
-
-    glutTimerFunc(g_animation_timer, animateCloth, 0);
-
-    while (true) {
-      glutMainLoopEvent();
-
-      glutSwapBuffers();
-
-      // redisplay
-      glutPostRedisplay();
-
-      // reset timer
-      glutTimerFunc(g_animation_timer, animateCloth, 0);
-    }
-    // glutMainLoop();
-
-    cleanUp();
-    return 0;
-  } catch (const std::runtime_error &e) {
-    std::cout << "Exception caught: " << e.what() << std::endl;
-    return -1;
+  initCamera(param);
+  while (true) {
+    glutMainLoopEvent();
+    glutPostRedisplay();
+    glutSwapBuffers();
   }
+  return 0;
 }

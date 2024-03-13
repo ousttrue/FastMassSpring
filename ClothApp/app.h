@@ -1,8 +1,6 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
 
-extern class UserInteraction *UI;
-
 // System parameters
 struct SystemParam {
   const int n = 33;     // must be odd, n * n = n_vertices | 61
@@ -16,21 +14,37 @@ struct SystemParam {
   const float g = 9.8f * m;            // gravitational force | 9.8f
 };
 
-void checkGlErrors();
-
-// scene update
-void updateProjection();
-void updateRenderTarget();
-
-void initGLState();
-
-void initShaders();                       // Read, compile and link shaders
-void initCloth(const SystemParam &param); // Generate cloth mesh
-
-// cleaning
-void cleanUp();
-
 // draw cloth function
-void drawCloth(const glm::mat4 &proj, const glm::mat4 &view);
+class Demo {
+  // Shader Handles
+  class PhongShader *g_phongShader = nullptr; // linked phong shader
+  class PickShader *g_pickShader = nullptr;   // linked pick shader
 
-void animateCloth(int value);
+  // User Interaction
+  class Renderer *g_pickRenderer = nullptr;
+
+  // Shader parameters
+  const glm::vec3 g_albedo = {0.0f, 0.3f, 0.7f};
+  const glm::vec3 g_ambient = {0.01f, 0.01f, 0.01f};
+  const glm::vec3 g_light = {1.0f, 1.0f, -1.0f};
+
+  // Mesh
+  class Mesh *g_clothMesh = nullptr; // halfedge data structure
+
+  // Render Target
+  class ProgramInput *g_render_target =
+      nullptr; // vertex, normal, texutre, index
+
+  // Mass Spring System
+  class mass_spring_system *g_system = nullptr;
+  class MassSpringSolver *g_solver = nullptr;
+
+  // Constraint Graph
+  class CgRootNode *g_cgRootNode = nullptr;
+
+public:
+  class UserInteraction *UI = nullptr;
+  Demo(const SystemParam &param);
+  ~Demo();
+  void drawCloth(const glm::mat4 &proj, const glm::mat4 &view);
+};
