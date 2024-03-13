@@ -18,6 +18,7 @@ executable(
         'Renderer.cpp',
         'Shader.cpp',
         'UserInteraction.cpp',
+        'demo_hang.cpp',
     ],
     install: true,
     dependencies: [
