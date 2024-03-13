@@ -167,9 +167,12 @@ static void initShaders() {
 	GLShader phong_frag(GL_FRAGMENT_SHADER);
 	GLShader pick_frag(GL_FRAGMENT_SHADER);
 
-	auto ibasic = std::ifstream("./shaders/basic.vshader");
-	auto iphong = std::ifstream("./shaders/phong.fshader");
-	auto ifrag = std::ifstream("./shaders/pick.fshader");
+	auto ibasic = std::ifstream("./ClothApp/shaders/basic.vshader");
+	assert(ibasic);
+	auto iphong = std::ifstream("./ClothApp/shaders/phong.fshader");
+	assert(iphong);
+	auto ifrag = std::ifstream("./ClothApp/shaders/pick.fshader");
+	assert(ifrag);
 
 	basic_vert.compile(ibasic);
 	phong_frag.compile(iphong);

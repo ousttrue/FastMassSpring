@@ -243,3 +243,13 @@ ModelManifest.xml
 
 build/
 .vscode/
+
+subprojects/*
+!subprojects/packagefiles
+!subprojects/glew.wrap
+!subprojects/freeglut.wrap
+!subprojects/glm.wrap
+!subprojects/openmesh.wrap
+!subprojects/eigen.wrap
+
+prefix

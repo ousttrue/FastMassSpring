@@ -1,0 +1,9 @@
+[wrap-file]
+directory = OpenMesh-10.0.0
+source_url = https://www.graphics.rwth-aachen.de/media/openmesh_static/Releases/10.0/OpenMesh-10.0.0.zip
+source_filename = OpenMesh-10.0.0.zip
+source_hash = 088eeedee8c288c8da6b5d256299e3d3c5dafa441c5a01e8669e49812954b77e
+patch_directory = openmesh
+
+[provide]
+openmesh = openmesh_dep
