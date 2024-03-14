@@ -1,6 +1,7 @@
 #pragma once
+#include "demo_base.h"
 
-struct DemoHang {
+struct DemoHang : DemoBase {
   // Mass Spring System
   struct mass_spring_system *g_system = nullptr;
   class MassSpringSolver *g_solver = nullptr;

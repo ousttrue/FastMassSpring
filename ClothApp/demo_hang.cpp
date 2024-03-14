@@ -6,26 +6,8 @@
 #include "param.h"
 
 DemoHang::DemoHang(const SystemParam &param, Mesh *g_clothMesh,
-                   class ProgramInput *g_render_target) {
-  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
-  assert(ibasic.size());
-  GLShader basic_vert(GL_VERTEX_SHADER);
-  basic_vert.compile(ibasic);
-
-  auto ifrag = readall("./ClothApp/shaders/pick.fshader");
-  assert(ifrag.size());
-  GLShader pick_frag(GL_FRAGMENT_SHADER);
-  pick_frag.compile(ifrag);
-
-  g_pickShader = new PickShader;
-  g_pickShader->link(basic_vert, pick_frag);
-
-  // initialize mass spring system
-  MassSpringBuilder massSpringBuilder;
-  massSpringBuilder.uniformGrid(param.n, param.h, param.r, param.k, param.m,
-                                param.a, param.g);
-  g_system = massSpringBuilder.getResult();
-
+                   class ProgramInput *g_render_target)
+    : DemoBase(param) {
   // initialize mass spring solver
   g_solver = new MassSpringSolver(g_system, g_clothMesh->vbuff());
 
@@ -74,7 +56,6 @@ DemoHang::~DemoHang() {
   delete UI;
 
   // delete mass-spring system
-  delete g_system;
   delete g_solver;
 }
 

@@ -6,13 +6,8 @@
 #include "param.h"
 
 DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
-                   class ProgramInput *g_render_target) {
-  // initialize mass spring system
-  MassSpringBuilder massSpringBuilder;
-  massSpringBuilder.uniformGrid(param.n, param.h, param.r, param.k, param.m,
-                                param.a, param.g);
-  g_system = massSpringBuilder.getResult();
-
+                   class ProgramInput *g_render_target)
+    : DemoBase(param) {
   // initialize mass spring solver
   g_solver = new MassSpringSolver(g_system, g_clothMesh->vbuff());
 
@@ -63,7 +58,6 @@ DemoDrop::~DemoDrop() {
   delete UI;
 
   // delete mass-spring system
-  delete g_system;
   delete g_solver;
 }
 
