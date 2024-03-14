@@ -59,12 +59,7 @@ void GLProgram::link(const GLShader &vshader, const GLShader &fshader) {
   // get camera uniforms
   _uModelViewMatrix = glGetUniformLocation(_handle, "uModelViewMatrix");
   _uProjectionMatrix = glGetUniformLocation(_handle, "uProjectionMatrix");
-
-  // post link
-  postLink();
 }
-
-void GLProgram::postLink() {}
 
 void GLProgram::setUniformMat4(GLuint unif, glm::mat4 m) {
   glUniformMatrix4fv(unif, 1, GL_FALSE, glm::value_ptr(m[0]));
@@ -86,22 +81,13 @@ void GLProgram::setProjection(glm::mat4 m) {
 PhongMaterial::PhongMaterial() {}
 
 void PhongMaterial::setAlbedo(const glm::vec3 &albedo) {
-  assert(_uAlbedo >= 0);
-  glUseProgram(_shader->handle());
   glUniform3f(_uAlbedo, albedo[0], albedo[1], albedo[2]);
-  glUseProgram(0);
 }
 void PhongMaterial::setAmbient(const glm::vec3 &ambient) {
-  assert(_uAmbient >= 0);
-  glUseProgram(_shader->handle());
   glUniform3f(_uAmbient, ambient[0], ambient[1], ambient[2]);
-  glUseProgram(0);
 }
 void PhongMaterial::setLight(const glm::vec3 &light) {
-  assert(_uLight >= 0);
-  glUseProgram(_shader->handle());
   glUniform3f(_uLight, light[0], light[1], light[2]);
-  glUseProgram(0);
 }
 
 std::shared_ptr<PhongMaterial> PhongMaterial::make() {

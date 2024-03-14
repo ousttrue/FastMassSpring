@@ -2,10 +2,18 @@
 
 #include "UserInteraction.h"
 #include "app.h"
-#include "demo_drop.h"
-#include "demo_hang.h"
 #include "param.h"
 #include <GL/freeglut.h>
+
+std::shared_ptr<App> g_app;
+#if 0
+#include "demo_hang.h"
+using DEMO = DemoHang;
+#else
+#include "demo_drop.h"
+using DEMO = DemoDrop;
+#endif
+std::shared_ptr<DEMO> g_demo;
 
 // Window
 static int g_windowWidth = 640;
@@ -55,14 +63,6 @@ void reshape(int w, int h) {
   updateProjection();
 }
 
-std::shared_ptr<App> g_app;
-#if 0
-using DEMO = DemoHang;
-#else
-using DEMO = DemoDrop;
-#endif
-std::shared_ptr<DEMO> g_demo;
-
 void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickX = x;
   g_mouseClickY = g_windowHeight - y - 1;
@@ -81,9 +81,8 @@ void mouse(const int button, const int state, const int x, const int y) {
   // TODO: move to UserInteraction class: add renderer member variable
   // pick point
   if (g_mouseLClickButton) {
-    g_demo->UI->setModelview(g_ModelViewMatrix);
-    g_demo->UI->setProjection(g_ProjectionMatrix);
-    g_demo->UI->grabPoint(g_mouseClickX, g_mouseClickY);
+    g_demo->UI->grabPoint(g_ProjectionMatrix, g_ModelViewMatrix, g_mouseClickX,
+                          g_mouseClickY);
   } else {
     g_demo->UI->releasePoint();
   }
@@ -119,8 +118,7 @@ int main(int argc, char **argv) {
   glutCreateWindow("Cloth App");
   glewInit();
   g_app = std::make_shared<App>(param);
-  g_demo =
-      std::make_shared<DEMO>(param, g_app->g_clothMesh, g_app->g_render_target);
+  g_demo = std::make_shared<DEMO>(param, g_app->g_clothMesh, g_app->_vao);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);

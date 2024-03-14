@@ -1,6 +1,6 @@
 #include "Vao.h"
 
-ProgramInput::ProgramInput() {
+Vao::Vao() {
   // generate buffers
   glGenBuffers(4, &_vbo[0]);
 
@@ -26,27 +26,41 @@ ProgramInput::ProgramInput() {
   glBindVertexArray(0);
 }
 
-void ProgramInput::bufferData(unsigned int index, void *buff, size_t size) {
+Vao::~Vao() {
+  glDeleteBuffers(4, _vbo);
+  glDeleteVertexArrays(1, &_handle);
+}
+
+void Vao::bufferData(unsigned int index, void *buff, size_t size) {
   glBindBuffer(GL_ARRAY_BUFFER, _vbo[index]);
   glBufferData(GL_ARRAY_BUFFER, size, buff, GL_STATIC_DRAW);
 }
-void ProgramInput::setPositionData(float *buff, unsigned int len) {
+
+void Vao::setPositionData(float *buff, unsigned int len) {
   bufferData(0, buff, sizeof(float) * len);
 }
 
-void ProgramInput::setNormalData(float *buff, unsigned int len) {
+void Vao::setNormalData(float *buff, unsigned int len) {
   bufferData(1, buff, sizeof(float) * len);
 }
 
-void ProgramInput::setTextureData(float *buff, unsigned int len) {
+void Vao::setTextureData(float *buff, unsigned int len) {
   bufferData(2, buff, sizeof(float) * len);
 }
 
-void ProgramInput::setIndexData(unsigned int *buff, unsigned int len) {
+void Vao::setIndexData(unsigned int *buff, unsigned int len) {
+  this->n_elements = len;
   bufferData(3, buff, sizeof(unsigned int) * len);
 }
 
-ProgramInput::~ProgramInput() {
-  glDeleteBuffers(4, _vbo);
-  glDeleteVertexArrays(1, &_handle);
+void Vao::draw() {
+  glBindVertexArray(_handle);
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glDrawElements(GL_TRIANGLES, n_elements, GL_UNSIGNED_INT, 0);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
+  glBindVertexArray(0);
 }

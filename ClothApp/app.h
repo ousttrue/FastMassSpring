@@ -16,9 +16,8 @@ public:
   // Mesh
   class Mesh *g_clothMesh = nullptr; // halfedge data structure
 
-  // Render Target
-  class ProgramInput *g_render_target =
-      nullptr; // vertex, normal, texutre, index
+  // vertex, normal, texutre, index
+  std::shared_ptr<class Vao> _vao;
 
   App(const struct SystemParam &param);
   ~App();

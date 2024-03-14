@@ -1,12 +1,12 @@
 #include "demo_drop.h"
 #include "MassSpringSolver.h"
 #include "Mesh.h"
-#include "Renderer.h"
+#include "Shader.h"
 #include "UserInteraction.h"
 #include "param.h"
 
 DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
-                   class ProgramInput *g_render_target)
+                   const std::shared_ptr<class Vao> &vao)
     : DemoBase(param) {
   // initialize mass spring solver
   g_solver = new MassSpringSolver(g_system, g_clothMesh->vbuff());
@@ -31,15 +31,12 @@ DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
   deformationNode->addSprings(massSpringBuilder.getStructIndex());
 
   // initialize user interaction
-  g_pickRenderer = new Renderer();
-  g_pickRenderer->setProgram(g_pickShader->shader());
-  g_pickRenderer->setProgramInput(g_render_target);
-  g_pickRenderer->setElementCount(g_clothMesh->ibuffLen());
+  auto shader = g_pickShader->shader();
   g_pickShader->setTessFact(param.n);
   CgPointFixNode *mouseFixer =
       new CgPointFixNode(g_system, g_clothMesh->vbuff());
-  UI =
-      new GridMeshUI(g_pickRenderer, mouseFixer, g_clothMesh->vbuff(), param.n);
+  UI = new GridMeshUI(g_pickShader->shader(), vao, mouseFixer,
+                      g_clothMesh->vbuff(), param.n);
 
   // build constraint graph
   g_cgRootNode = new CgRootNode(g_system, g_clothMesh->vbuff());
@@ -54,7 +51,6 @@ DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
 
 DemoDrop::~DemoDrop() {
   // delete UI
-  delete g_pickRenderer;
   delete UI;
 
   // delete mass-spring system

@@ -1,25 +1,27 @@
 #include "UserInteraction.h"
+#include "Shader.h"
+#include "Vao.h"
 #include <GL/glew.h>
 #include <cmath>
-#include <iostream>
 
-UserInteraction::UserInteraction(Renderer *renderer, CgPointFixNode *fixer,
-                                 float *vbuff)
-    : renderer(renderer), vbuff(vbuff), fixer(fixer), i(-1) {}
+UserInteraction::UserInteraction(const std::shared_ptr<GLProgram> &shader,
+                                 const std::shared_ptr<Vao> &vao,
+                                 CgPointFixNode *fixer, float *vbuff)
+    : _shader(shader), _vao(vao), i(-1), vbuff(vbuff), fixer(fixer) {}
 
-void UserInteraction::setModelview(const glm::mat4 &mv) {
-  renderer->setModelview(mv);
-}
-void UserInteraction::setProjection(const glm::mat4 &p) {
-  renderer->setProjection(p);
-}
-
-void UserInteraction::grabPoint(int mouse_x, int mouse_y) {
+void UserInteraction::grabPoint(const glm::mat4 &p, const glm::mat4 &mv,
+                                int mouse_x, int mouse_y) {
   // render scene
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_FRAMEBUFFER_SRGB);
-  renderer->draw();
+
+  _shader->bind();
+  _shader->setModelView(mv);
+  _shader->setProjection(p);
+  _vao->draw();
+  _shader->unbind();
+
   glFlush();
 
   // read color
@@ -50,9 +52,10 @@ void UserInteraction::movePoint(vec3 v) {
   fixer->fixPoint(i);
 }
 
-GridMeshUI::GridMeshUI(Renderer *renderer, CgPointFixNode *fixer, float *vbuff,
-                       unsigned int n)
-    : UserInteraction(renderer, fixer, vbuff), n(n) {}
+GridMeshUI::GridMeshUI(const std::shared_ptr<GLProgram> &shader,
+                       const std::shared_ptr<Vao> &vao, CgPointFixNode *fixer,
+                       float *vbuff, unsigned int n)
+    : UserInteraction(shader, vao, fixer, vbuff), n(n) {}
 
 int GridMeshUI::colorToIndex(color c) const {
   if (c[2] != 51)

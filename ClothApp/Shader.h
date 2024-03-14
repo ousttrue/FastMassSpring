@@ -23,7 +23,7 @@ class GLProgram : public NonCopyable {
 
 public:
   GLProgram();
-  virtual ~GLProgram();
+  ~GLProgram();
   GLuint handle() const { return _handle; }
   static std::shared_ptr<GLProgram> make(const std::string &vs,
                                          const std::string &fs);
@@ -34,8 +34,7 @@ public:
 
 private:
   void setUniformMat4(GLuint unif, glm::mat4 m);
-  virtual void link(const GLShader &vshader, const GLShader &fshader);
-  virtual void postLink();
+  void link(const GLShader &vshader, const GLShader &fshader);
 };
 
 class PhongMaterial : public NonCopyable {

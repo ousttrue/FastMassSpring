@@ -15,7 +15,6 @@ executable(
         'app.cpp',
         'MassSpringSolver.cpp',
         'Mesh.cpp',
-        'Renderer.cpp',
         'Shader.cpp',
         'Vao.cpp',
         'UserInteraction.cpp',

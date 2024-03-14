@@ -8,7 +8,6 @@ struct DemoHang : DemoBase {
 
   // User Interaction
   std::shared_ptr<class PickMaterial> g_pickShader;
-  class Renderer *g_pickRenderer = nullptr;
 
   class UserInteraction *UI = nullptr;
 
@@ -16,7 +15,7 @@ struct DemoHang : DemoBase {
   class CgRootNode *g_cgRootNode = nullptr;
 
   DemoHang(const struct SystemParam &param, class Mesh *g_clothMesh,
-           class ProgramInput *g_render_target);
+           const std::shared_ptr<class Vao> &vao);
   ~DemoHang();
   void Animation();
 };

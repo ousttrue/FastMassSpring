@@ -1,7 +1,7 @@
 #include "app.h"
 #include "Mesh.h"
-#include "Renderer.h"
 #include "Shader.h"
+#include "Vao.h"
 #include "param.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -28,13 +28,11 @@ App::App(const SystemParam &param) {
   g_clothMesh = meshBuilder.getResult();
 
   // fill program input
-  g_render_target = new ProgramInput;
-  g_render_target->setPositionData(g_clothMesh->vbuff(),
-                                   g_clothMesh->vbuffLen());
-  g_render_target->setNormalData(g_clothMesh->nbuff(), g_clothMesh->nbuffLen());
-  g_render_target->setTextureData(g_clothMesh->tbuff(),
-                                  g_clothMesh->tbuffLen());
-  g_render_target->setIndexData(g_clothMesh->ibuff(), g_clothMesh->ibuffLen());
+  _vao = std::make_shared<Vao>();
+  _vao->setPositionData(g_clothMesh->vbuff(), g_clothMesh->vbuffLen());
+  _vao->setNormalData(g_clothMesh->nbuff(), g_clothMesh->nbuffLen());
+  _vao->setTextureData(g_clothMesh->tbuff(), g_clothMesh->tbuffLen());
+  _vao->setIndexData(g_clothMesh->ibuff(), g_clothMesh->ibuffLen());
 
   // check errors
   checkGlErrors();
@@ -47,7 +45,6 @@ App::~App() {
   delete g_clothMesh;
 
   // delete render target
-  delete g_render_target;
 
   // delete constraint graph
   // TODO
@@ -60,11 +57,10 @@ void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   g_clothMesh->release_face_normals();
 
   // update vertex positions
-  g_render_target->setPositionData(g_clothMesh->vbuff(),
-                                   g_clothMesh->vbuffLen());
+  _vao->setPositionData(g_clothMesh->vbuff(), g_clothMesh->vbuffLen());
 
   // update vertex normals
-  g_render_target->setNormalData(g_clothMesh->nbuff(), g_clothMesh->vbuffLen());
+  _vao->setNormalData(g_clothMesh->nbuff(), g_clothMesh->vbuffLen());
 
   //
   // render
@@ -80,18 +76,16 @@ void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   glReadBuffer(GL_BACK);
   glEnable(GL_FRAMEBUFFER_SRGB);
 
-  g_phongShader->shader()->bind();
-  Renderer renderer;
-  renderer.setProgram(g_phongShader->shader());
-  renderer.setModelview(view);
-  renderer.setProjection(proj);
-  g_phongShader->setAlbedo(g_albedo);
-  g_phongShader->setAmbient(g_ambient);
-  g_phongShader->setLight(g_light);
-  renderer.setProgramInput(g_render_target);
-  renderer.setElementCount(g_clothMesh->ibuffLen());
-  renderer.draw();
+  auto shader = g_phongShader->shader();
+  shader->bind();
+  {
+    shader->setModelView(view);
+    shader->setProjection(proj);
+    g_phongShader->setAlbedo(g_albedo);
+    g_phongShader->setAmbient(g_ambient);
+    g_phongShader->setLight(g_light);
+    _vao->draw();
+    checkGlErrors();
+  }
   g_phongShader->shader()->unbind();
-
-  checkGlErrors();
 }
