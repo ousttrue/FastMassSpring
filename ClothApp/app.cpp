@@ -20,13 +20,13 @@ static void checkGlErrors() {
 
 App::App(const SystemParam &param) {
 
-  auto ibasic = std::ifstream("./ClothApp/shaders/basic.vshader");
-  assert(ibasic);
+  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
+  assert(ibasic.size());
   GLShader basic_vert(GL_VERTEX_SHADER);
   basic_vert.compile(ibasic);
 
-  auto iphong = std::ifstream("./ClothApp/shaders/phong.fshader");
-  assert(iphong);
+  auto iphong = readall("./ClothApp/shaders/phong.fshader");
+  assert(iphong.size());
   GLShader phong_frag(GL_FRAGMENT_SHADER);
   phong_frag.compile(iphong);
 

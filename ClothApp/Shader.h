@@ -3,7 +3,6 @@
 #include <fstream>
 #include <glm/glm.hpp>
 
-
 class NonCopyable {
 private:
   NonCopyable(const NonCopyable &other) = delete;
@@ -21,8 +20,7 @@ public:
   GLShader(GLenum shaderType);
   /*GLShader(GLenum shaderType, const char* source);
   GLShader(GLenum shaderType, std::ifstream& source);*/
-  void compile(const char *source);
-  void compile(std::ifstream &source);
+  void compile(const std::string &source);
   operator GLuint() const; // cast to GLuint
   ~GLShader();
 };
@@ -86,3 +84,14 @@ public:
   virtual void postLink();
   void setTessFact(unsigned int n);
 };
+
+inline std::string readall(const std::string &path) {
+  std::ifstream source(path, std::ios::binary);
+  std::string text;
+  source.seekg(0, std::ios_base::end);
+  std::streampos fileSize = source.tellg();
+  text.resize(fileSize);
+  source.seekg(0, std::ios_base::beg);
+  source.read((char *)text.data(), fileSize);
+  return text;
+}

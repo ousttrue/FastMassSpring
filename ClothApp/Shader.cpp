@@ -11,14 +11,14 @@ GLShader::operator GLuint() const { return handle; }
 
 GLShader::~GLShader() { glDeleteShader(handle); }
 
-void GLShader::compile(const char *source) {
+void GLShader::compile(const std::string &source) {
   GLint compiled = 0; // Compiled flag
-  const char *ptrs[] = {source};
-  const GLint lens[] = {(GLint)std::strlen(source)};
+  const char *ptrs[] = {source.c_str()};
+  const GLint lens[] = {static_cast<GLint>(source.size())};
   glShaderSource(handle, 1, ptrs, lens);
   glCompileShader(handle);
   glGetShaderiv(handle, GL_COMPILE_STATUS, &compiled);
-  if (!compiled) {
+  if (compiled != GL_TRUE) {
     GLint logSize = 0;
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logSize);
     std::vector<GLchar> errorLog(logSize);
@@ -26,17 +26,6 @@ void GLShader::compile(const char *source) {
     std::cerr << &errorLog[0] << std::endl;
     throw std::runtime_error("Failed to compile shader.");
   }
-}
-
-void GLShader::compile(std::ifstream &source) {
-  std::vector<char> text;
-  source.seekg(0, std::ios_base::end);
-  std::streampos fileSize = source.tellg();
-  text.resize(fileSize);
-
-  source.seekg(0, std::ios_base::beg);
-  source.read(&text[0], fileSize);
-  compile(&text[0]);
 }
 
 // GLPROGRAM

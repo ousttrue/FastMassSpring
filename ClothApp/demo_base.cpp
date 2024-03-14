@@ -2,13 +2,13 @@
 #include "Shader.h"
 
 DemoBase::DemoBase() {
-  auto ibasic = std::ifstream("./ClothApp/shaders/basic.vshader");
-  assert(ibasic);
+  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
+  assert(ibasic.size());
   GLShader basic_vert(GL_VERTEX_SHADER);
   basic_vert.compile(ibasic);
 
-  auto ifrag = std::ifstream("./ClothApp/shaders/pick.fshader");
-  assert(ifrag);
+  auto ifrag = readall("./ClothApp/shaders/pick.fshader");
+  assert(ifrag.size());
   GLShader pick_frag(GL_FRAGMENT_SHADER);
   pick_frag.compile(ifrag);
 
