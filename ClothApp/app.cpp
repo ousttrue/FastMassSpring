@@ -19,48 +19,33 @@ static void checkGlErrors() {
 }
 
 App::App(const SystemParam &param) {
-
-  g_phongShader = PhongMaterial::make();
-
-  // generate mesh
-  MeshBuilder meshBuilder;
-  meshBuilder.uniformGrid(param.w, param.n);
-  g_clothMesh = meshBuilder.getResult();
+  _material = PhongMaterial::make();
+  _mesh = MeshBuilder::uniformGrid(param.w, param.n);
 
   // fill program input
   _vao = std::make_shared<Vao>();
-  _vao->setPositionData(g_clothMesh->vbuff(), g_clothMesh->vbuffLen());
-  _vao->setNormalData(g_clothMesh->nbuff(), g_clothMesh->nbuffLen());
-  _vao->setTextureData(g_clothMesh->tbuff(), g_clothMesh->tbuffLen());
-  _vao->setIndexData(g_clothMesh->ibuff(), g_clothMesh->ibuffLen());
+  _vao->setPositionData(_mesh->vbuff(), _mesh->vbuffLen());
+  _vao->setNormalData(_mesh->nbuff(), _mesh->nbuffLen());
+  _vao->setTextureData(_mesh->tbuff(), _mesh->tbuffLen());
+  _vao->setIndexData(_mesh->ibuff(), _mesh->ibuffLen());
 
   // check errors
   checkGlErrors();
 }
 
-App::~App() {
-  std::cout << "Tmp::~Tmp" << std::endl;
-
-  // delete mesh
-  delete g_clothMesh;
-
-  // delete render target
-
-  // delete constraint graph
-  // TODO
-}
+App::~App() { std::cout << "Tmp::~Tmp" << std::endl; }
 
 void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   // update normals
-  g_clothMesh->request_face_normals();
-  g_clothMesh->update_normals();
-  g_clothMesh->release_face_normals();
+  _mesh->request_face_normals();
+  _mesh->update_normals();
+  _mesh->release_face_normals();
 
   // update vertex positions
-  _vao->setPositionData(g_clothMesh->vbuff(), g_clothMesh->vbuffLen());
+  _vao->setPositionData(_mesh->vbuff(), _mesh->vbuffLen());
 
   // update vertex normals
-  _vao->setNormalData(g_clothMesh->nbuff(), g_clothMesh->vbuffLen());
+  _vao->setNormalData(_mesh->nbuff(), _mesh->vbuffLen());
 
   //
   // render
@@ -76,16 +61,16 @@ void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   glReadBuffer(GL_BACK);
   glEnable(GL_FRAMEBUFFER_SRGB);
 
-  auto shader = g_phongShader->shader();
+  auto shader = _material->shader();
   shader->bind();
   {
     shader->setModelView(view);
     shader->setProjection(proj);
-    g_phongShader->setAlbedo(g_albedo);
-    g_phongShader->setAmbient(g_ambient);
-    g_phongShader->setLight(g_light);
+    _material->setAlbedo(g_albedo);
+    _material->setAmbient(g_ambient);
+    _material->setLight(g_light);
     _vao->draw();
     checkGlErrors();
   }
-  g_phongShader->shader()->unbind();
+  _material->shader()->unbind();
 }

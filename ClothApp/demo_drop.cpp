@@ -5,11 +5,11 @@
 #include "UserInteraction.h"
 #include "param.h"
 
-DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
+DemoDrop::DemoDrop(const SystemParam &param, const std::shared_ptr<Mesh> &mesh,
                    const std::shared_ptr<class Vao> &vao)
     : DemoBase(param) {
   // initialize mass spring solver
-  g_solver = new MassSpringSolver(g_system, g_clothMesh->vbuff());
+  g_solver = std::make_shared<MassSpringSolver>(g_system, mesh->vbuff());
 
   // sphere collision constraint parameters
   const float radius = 0.64f;             // sphere radius | 0.64f
@@ -22,24 +22,23 @@ DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
   // initialize constraints
   // sphere collision constraint
   CgSphereCollisionNode *sphereCollisionNode =
-      new CgSphereCollisionNode(g_system, g_clothMesh->vbuff(), radius, center);
+      new CgSphereCollisionNode(g_system, mesh->vbuff(), radius, center);
 
   // spring deformation constraint
-  CgSpringDeformationNode *deformationNode = new CgSpringDeformationNode(
-      g_system, g_clothMesh->vbuff(), tauc, deformIter);
+  CgSpringDeformationNode *deformationNode =
+      new CgSpringDeformationNode(g_system, mesh->vbuff(), tauc, deformIter);
   deformationNode->addSprings(massSpringBuilder.getShearIndex());
   deformationNode->addSprings(massSpringBuilder.getStructIndex());
 
   // initialize user interaction
   auto shader = g_pickShader->shader();
   g_pickShader->setTessFact(param.n);
-  CgPointFixNode *mouseFixer =
-      new CgPointFixNode(g_system, g_clothMesh->vbuff());
-  UI = new GridMeshUI(g_pickShader->shader(), vao, mouseFixer,
-                      g_clothMesh->vbuff(), param.n);
+  CgPointFixNode *mouseFixer = new CgPointFixNode(g_system, mesh->vbuff());
+  UI = std::make_shared<GridMeshUI>(g_pickShader->shader(), vao, mouseFixer,
+                                    mesh->vbuff(), param.n);
 
   // build constraint graph
-  g_cgRootNode = new CgRootNode(g_system, g_clothMesh->vbuff());
+  g_cgRootNode = std::make_shared<CgRootNode>(g_system, mesh->vbuff());
 
   // first layer
   g_cgRootNode->addChild(deformationNode);
@@ -49,13 +48,7 @@ DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
   deformationNode->addChild(mouseFixer);
 }
 
-DemoDrop::~DemoDrop() {
-  // delete UI
-  delete UI;
-
-  // delete mass-spring system
-  delete g_solver;
-}
+DemoDrop::~DemoDrop() {}
 
 void DemoDrop::Animation() {
   const int g_iter = 5; // iterations per time step | 10

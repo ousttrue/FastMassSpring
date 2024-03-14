@@ -1,17 +1,17 @@
 #pragma once
 #include "demo_base.h"
+#include <memory>
 
 struct DemoDrop : public DemoBase {
   // Mass Spring System
-  class MassSpringSolver *g_solver = nullptr;
-
+  std::shared_ptr<class MassSpringSolver> g_solver;
   // User Interaction
-  class UserInteraction *UI = nullptr;
-
+  std::shared_ptr<class UserInteraction> UI;
   // Constraint Graph
-  class CgRootNode *g_cgRootNode = nullptr;
+  std::shared_ptr<class CgRootNode> g_cgRootNode;
 
-  DemoDrop(const struct SystemParam &param, class Mesh *g_clothMesh,
+  DemoDrop(const struct SystemParam &param,
+           const std::shared_ptr<class Mesh> &mesh,
            const std::shared_ptr<class Vao> &vao);
   ~DemoDrop();
   void Animation();

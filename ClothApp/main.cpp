@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   glutCreateWindow("Cloth App");
   glewInit();
   g_app = std::make_shared<App>(param);
-  g_demo = std::make_shared<DEMO>(param, g_app->g_clothMesh, g_app->_vao);
+  g_demo = std::make_shared<DEMO>(param, g_app->_mesh, g_app->_vao);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
