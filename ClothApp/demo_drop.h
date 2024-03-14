@@ -1,12 +1,12 @@
 #pragma once
+#include "demo_base.h"
 
-struct DemoDrop {
+struct DemoDrop : public DemoBase {
   // Mass Spring System
   struct mass_spring_system *g_system = nullptr;
   class MassSpringSolver *g_solver = nullptr;
 
   // User Interaction
-  class PickShader *g_pickShader = nullptr; // linked pick shader
   class Renderer *g_pickRenderer = nullptr;
 
   class UserInteraction *UI = nullptr;

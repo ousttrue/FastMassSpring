@@ -41,7 +41,7 @@ public:
   void setModelView(glm::mat4 m);
   void setProjection(glm::mat4 m);
 
-  ~GLProgram();
+  virtual ~GLProgram();
 };
 
 class ProgramInput : public NonCopyable {

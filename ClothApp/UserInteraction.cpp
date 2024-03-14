@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-
 UserInteraction::UserInteraction(Renderer *renderer, CgPointFixNode *fixer,
                                  float *vbuff)
     : renderer(renderer), vbuff(vbuff), fixer(fixer), i(-1) {}
@@ -58,7 +57,7 @@ GridMeshUI::GridMeshUI(Renderer *renderer, CgPointFixNode *fixer, float *vbuff,
 int GridMeshUI::colorToIndex(color c) const {
   if (c[2] != 51)
     return -1;
-  int vx = std::round((n - 1) * c[0] / 255.0);
-  int vy = std::round((n - 1) * c[1] / 255.0);
+  int vx = static_cast<int>(std::round((n - 1) * c[0] / 255.0));
+  int vy = static_cast<int>(std::round((n - 1) * c[1] / 255.0));
   return n * vy + vx;
 }
