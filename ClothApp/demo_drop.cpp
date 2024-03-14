@@ -32,7 +32,7 @@ DemoDrop::DemoDrop(const SystemParam &param, Mesh *g_clothMesh,
 
   // initialize user interaction
   g_pickRenderer = new Renderer();
-  g_pickRenderer->setProgram(g_pickShader);
+  g_pickRenderer->setProgram(g_pickShader->shader());
   g_pickRenderer->setProgramInput(g_render_target);
   g_pickRenderer->setElementCount(g_clothMesh->ibuffLen());
   g_pickShader->setTessFact(param.n);

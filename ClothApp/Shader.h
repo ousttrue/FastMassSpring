@@ -1,87 +1,66 @@
 #pragma once
+#include "noncopyable.h"
 #include <GL/glew.h>
 #include <fstream>
 #include <glm/glm.hpp>
-
-class NonCopyable {
-private:
-  NonCopyable(const NonCopyable &other) = delete;
-  NonCopyable &operator=(const NonCopyable &other) = delete;
-
-public:
-  NonCopyable() {}
-};
+#include <memory>
 
 class GLShader : public NonCopyable {
-private:
-  GLuint handle; // Shader handle
+  GLuint _handle;
 
 public:
   GLShader(GLenum shaderType);
-  /*GLShader(GLenum shaderType, const char* source);
-  GLShader(GLenum shaderType, std::ifstream& source);*/
-  void compile(const std::string &source);
-  operator GLuint() const; // cast to GLuint
   ~GLShader();
+  std::shared_ptr<GLShader> make(const std::string &source);
+  GLuint handle() const { return _handle; }
+  void compile(const std::string &source);
 };
 
 class GLProgram : public NonCopyable {
-protected:
-  GLuint handle;
-  GLuint uModelViewMatrix, uProjectionMatrix;
-  void setUniformMat4(GLuint unif, glm::mat4 m);
+  GLuint _handle;
+  GLuint _uModelViewMatrix;
+  GLuint _uProjectionMatrix;
 
 public:
   GLProgram();
-  virtual void link(const GLShader &vshader, const GLShader &fshader);
-  virtual void postLink();
-  operator GLuint() const; // cast to GLuint
+  virtual ~GLProgram();
+  GLuint handle() const { return _handle; }
+  static std::shared_ptr<GLProgram> make(const std::string &vs,
+                                         const std::string &fs);
+  void bind();
+  void unbind();
   void setModelView(glm::mat4 m);
   void setProjection(glm::mat4 m);
 
-  virtual ~GLProgram();
-};
-
-class ProgramInput : public NonCopyable {
 private:
-  GLuint handle; // vertex array object handle
-  GLuint
-      vbo[4]; // vertex buffer object handles | position, normal, texture, index
-  void bufferData(unsigned int index, void *buff, size_t size);
-
-public:
-  ProgramInput();
-
-  void setPositionData(float *buff, unsigned int len);
-  void setNormalData(float *buff, unsigned int len);
-  void setTextureData(float *buff, unsigned int len);
-  void setIndexData(unsigned int *buff, unsigned int len);
-
-  operator GLuint() const; // cast to GLuint
-
-  ~ProgramInput();
-};
-
-class PhongShader : public GLProgram {
-private:
-  // Albedo | Ambient Light | Light Direction
-  GLuint uAlbedo, uAmbient, uLight;
-
-public:
-  PhongShader();
+  void setUniformMat4(GLuint unif, glm::mat4 m);
+  virtual void link(const GLShader &vshader, const GLShader &fshader);
   virtual void postLink();
+};
+
+class PhongMaterial : public NonCopyable {
+  GLuint _uAlbedo = -1;
+  GLuint _uAmbient = -1;
+  GLuint _uLight = -1;
+  std::shared_ptr<GLProgram> _shader;
+
+public:
+  PhongMaterial();
+  static std::shared_ptr<PhongMaterial> make();
+  std::shared_ptr<GLProgram> shader() const { return _shader; }
   void setAlbedo(const glm::vec3 &albedo);
   void setAmbient(const glm::vec3 &ambient);
   void setLight(const glm::vec3 &light);
 };
 
-class PickShader : public GLProgram {
-private:
-  GLuint uTessFact;
+class PickMaterial : public NonCopyable {
+  GLuint _uTessFact;
+  std::shared_ptr<GLProgram> _shader;
 
 public:
-  PickShader();
-  virtual void postLink();
+  PickMaterial();
+  static std::shared_ptr<PickMaterial> make();
+  std::shared_ptr<GLProgram> shader() const { return _shader; }
   void setTessFact(unsigned int n);
 };
 

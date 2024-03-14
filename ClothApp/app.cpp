@@ -20,20 +20,7 @@ static void checkGlErrors() {
 
 App::App(const SystemParam &param) {
 
-  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
-  assert(ibasic.size());
-  GLShader basic_vert(GL_VERTEX_SHADER);
-  basic_vert.compile(ibasic);
-
-  auto iphong = readall("./ClothApp/shaders/phong.fshader");
-  assert(iphong.size());
-  GLShader phong_frag(GL_FRAGMENT_SHADER);
-  phong_frag.compile(iphong);
-
-  g_phongShader = new PhongShader;
-  g_phongShader->link(basic_vert, phong_frag);
-
-  checkGlErrors();
+  g_phongShader = PhongMaterial::make();
 
   // generate mesh
   MeshBuilder meshBuilder;
@@ -93,8 +80,9 @@ void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   glReadBuffer(GL_BACK);
   glEnable(GL_FRAMEBUFFER_SRGB);
 
+  g_phongShader->shader()->bind();
   Renderer renderer;
-  renderer.setProgram(g_phongShader);
+  renderer.setProgram(g_phongShader->shader());
   renderer.setModelview(view);
   renderer.setProjection(proj);
   g_phongShader->setAlbedo(g_albedo);
@@ -103,6 +91,7 @@ void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
   renderer.setProgramInput(g_render_target);
   renderer.setElementCount(g_clothMesh->ibuffLen());
   renderer.draw();
+  g_phongShader->shader()->unbind();
 
   checkGlErrors();
 }

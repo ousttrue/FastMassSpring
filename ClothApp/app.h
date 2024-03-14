@@ -1,10 +1,11 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 // draw cloth function
 class App {
-  // Shader Handles
-  class PhongShader *g_phongShader = nullptr; // linked phong shader
+  // phong shader
+  std::shared_ptr<class PhongMaterial> g_phongShader;
 
   // Shader parameters
   const glm::vec3 g_albedo = {0.0f, 0.3f, 0.7f};

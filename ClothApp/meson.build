@@ -17,6 +17,7 @@ executable(
         'Mesh.cpp',
         'Renderer.cpp',
         'Shader.cpp',
+        'Vao.cpp',
         'UserInteraction.cpp',
         'demo_base.cpp',
         'demo_drop.cpp',

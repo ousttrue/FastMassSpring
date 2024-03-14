@@ -7,7 +7,7 @@ struct DemoHang : DemoBase {
   class MassSpringSolver *g_solver = nullptr;
 
   // User Interaction
-  class PickShader *g_pickShader = nullptr; // linked pick shader
+  std::shared_ptr<class PickMaterial> g_pickShader;
   class Renderer *g_pickRenderer = nullptr;
 
   class UserInteraction *UI = nullptr;

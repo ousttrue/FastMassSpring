@@ -1,8 +1,9 @@
 #pragma once
 #include "MassSpringSolver.h"
+#include <memory>
 
 struct DemoBase {
-  class PickShader *g_pickShader = nullptr; // linked pick shader
+  std::shared_ptr<class PickMaterial> g_pickShader;
   struct mass_spring_system *g_system = nullptr;
   MassSpringBuilder massSpringBuilder;
 
