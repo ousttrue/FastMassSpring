@@ -1,10 +1,18 @@
 #include <GL/glew.h>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <stdio.h>
+#define GL_SILENCE_DEPRECATION
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+#include <GLES2/gl2.h>
+#endif
+#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+
 #include "UserInteraction.h"
 #include "app.h"
 #include "param.h"
-// #include <GL/freeglut.h>
-#include <GLFW/glfw3.h>
 
 std::shared_ptr<App> g_app;
 #if 0
@@ -110,12 +118,36 @@ int main(int argc, char **argv) {
 
   glfwSetErrorCallback(error_callback);
 
-  if (!glfwInit())
+  if (!glfwInit()) {
     exit(EXIT_FAILURE);
+  }
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+  // GL ES 2.0 + GLSL 100
+  const char *glsl_version = "#version 100";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+  // GL 3.2 + GLSL 150
+  const char *glsl_version = "#version 150";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
+#else
+  // GL 3.0 + GLSL 130
+  const char *glsl_version = "#version 130";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+
+  // only glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
+#endif
 
   auto window =
       glfwCreateWindow(g_windowWidth, g_windowHeight, "Cloth App", NULL, NULL);
@@ -133,16 +165,46 @@ int main(int argc, char **argv) {
     return 2;
   }
 
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  // ImGui::StyleColorsLight();
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
   g_app = std::make_shared<App>(param);
   g_demo = std::make_shared<DEMO>(param, g_app->_mesh, g_app->_vao);
 
-  glfwSetMouseButtonCallback(window, mouse_button_callback);
-  glfwSetCursorPosCallback(window, cursor_position_callback);
+  // glfwSetMouseButtonCallback(window, mouse_button_callback);
+  // glfwSetCursorPosCallback(window, cursor_position_callback);
 
   initCamera(param);
   while (!glfwWindowShouldClose(window)) {
     // update window event
     glfwPollEvents();
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // 1. Show the big demo window (Most of the sample code is in
+    // ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
+    // ImGui!).
+    ImGui::ShowDemoWindow({});
+    ImGui::Render();
+
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     if (width != g_windowWidth || height != g_windowHeight) {
@@ -156,9 +218,20 @@ int main(int argc, char **argv) {
 
     // draw
     glViewport(0, 0, width, height);
+
     g_app->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
   }
+
+  // Cleanup
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
 
   return 0;
 }

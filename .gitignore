@@ -252,5 +252,8 @@ subprojects/*
 !subprojects/openmesh.wrap
 !subprojects/eigen.wrap
 !subprojects/glfw.wrap
+!subprojects/imgui.wrap
+
+imgui.ini
 
 prefix

@@ -10,6 +10,7 @@ gl_dep = dependency('gl')
 # glu_dep = dependency('glu')
 cc = meson.get_compiler('c')
 glu_dep = cc.find_library('glu32', required: true)
+imgui_dep = dependency('imgui', default_options: ['default_library=static'])
 
 executable(
     'ClothApp',
@@ -35,5 +36,6 @@ executable(
         eigen_dep,
         gl_dep,
         glu_dep,
+        imgui_dep,
     ],
 )
