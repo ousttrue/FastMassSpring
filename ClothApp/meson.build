@@ -1,5 +1,8 @@
 glew_dep = dependency('glew')
-freeglut_dep = dependency('glut')
+
+# freeglut_dep = dependency('glut')
+glfw_dep = dependency('glfw3', default_options: ['install=true'])
+
 glm_dep = dependency('glm')
 openmesh_dep = dependency('openmesh')
 eigen_dep = dependency('eigen3')
@@ -25,7 +28,8 @@ executable(
     install: true,
     dependencies: [
         glew_dep,
-        freeglut_dep,
+        # freeglut_dep,
+        glfw_dep,
         glm_dep,
         openmesh_dep,
         eigen_dep,

@@ -251,5 +251,6 @@ subprojects/*
 !subprojects/glm.wrap
 !subprojects/openmesh.wrap
 !subprojects/eigen.wrap
+!subprojects/glfw.wrap
 
 prefix

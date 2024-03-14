@@ -3,7 +3,8 @@
 #include "UserInteraction.h"
 #include "app.h"
 #include "param.h"
-#include <GL/freeglut.h>
+// #include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 
 std::shared_ptr<App> g_app;
 #if 0
@@ -56,24 +57,21 @@ static void initCamera(const SystemParam &param) {
   updateProjection();
 }
 
-void reshape(int w, int h) {
-  g_windowWidth = w;
-  g_windowHeight = h;
-  glViewport(0, 0, w, h);
-  updateProjection();
-}
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods) {
+  g_mouseLClickButton |=
+      (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS);
+  g_mouseRClickButton |=
+      (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+  g_mouseMClickButton |=
+      (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS);
 
-void mouse(const int button, const int state, const int x, const int y) {
-  g_mouseClickX = x;
-  g_mouseClickY = g_windowHeight - y - 1;
-
-  g_mouseLClickButton |= (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN);
-  g_mouseRClickButton |= (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN);
-  g_mouseMClickButton |= (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN);
-
-  g_mouseLClickButton &= !(button == GLUT_LEFT_BUTTON && state == GLUT_UP);
-  g_mouseRClickButton &= !(button == GLUT_RIGHT_BUTTON && state == GLUT_UP);
-  g_mouseMClickButton &= !(button == GLUT_MIDDLE_BUTTON && state == GLUT_UP);
+  g_mouseLClickButton &=
+      !(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE);
+  g_mouseRClickButton &=
+      !(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE);
+  g_mouseMClickButton &=
+      !(button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE);
 
   g_mouseClickDown =
       g_mouseLClickButton || g_mouseRClickButton || g_mouseMClickButton;
@@ -88,15 +86,9 @@ void mouse(const int button, const int state, const int x, const int y) {
   }
 }
 
-void display() {
-  g_demo->Animation();
-  g_app->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
-}
-
-void motion(const int x, const int y) {
+static void cursor_position_callback(GLFWwindow *window, double x, double y) {
   const float dx = float(x - g_mouseClickX);
   const float dy = float(-(g_windowHeight - y - 1 - g_mouseClickY));
-
   if (g_mouseLClickButton) {
     // glm::vec3 ux(g_ModelViewMatrix * glm::vec4(1, 0, 0, 0));
     // glm::vec3 uy(g_ModelViewMatrix * glm::vec4(0, 1, 0, 0));
@@ -105,31 +97,68 @@ void motion(const int x, const int y) {
     g_demo->UI->movePoint(0.01f * (dx * ux + dy * uy));
   }
 
-  g_mouseClickX = x;
-  g_mouseClickY = g_windowHeight - y - 1;
+  g_mouseClickX = static_cast<int>(x);
+  g_mouseClickY = g_windowHeight - static_cast<int>(y) - 1;
+}
+
+static void error_callback(int error, const char *description) {
+  fprintf(stderr, "Error: %s\n", description);
 }
 
 int main(int argc, char **argv) {
   SystemParam param = {};
 
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowSize(g_windowWidth, g_windowHeight);
-  glutCreateWindow("Cloth App");
-  glewInit();
+  glfwSetErrorCallback(error_callback);
+
+  if (!glfwInit())
+    exit(EXIT_FAILURE);
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  auto window =
+      glfwCreateWindow(g_windowWidth, g_windowHeight, "Cloth App", NULL, NULL);
+  if (!window) {
+    glfwTerminate();
+    return 1;
+  }
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
+
+  GLenum err = glewInit();
+  if (GLEW_OK != err) {
+    /* Problem: glewInit failed, something is seriously wrong. */
+    fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    return 2;
+  }
+
   g_app = std::make_shared<App>(param);
   g_demo = std::make_shared<DEMO>(param, g_app->_mesh, g_app->_vao);
 
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
 
   initCamera(param);
-  while (true) {
-    glutMainLoopEvent();
-    glutPostRedisplay();
-    glutSwapBuffers();
+  while (!glfwWindowShouldClose(window)) {
+    // update window event
+    glfwPollEvents();
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    if (width != g_windowWidth || height != g_windowHeight) {
+      g_windowWidth = width;
+      g_windowHeight = height;
+      updateProjection();
+    }
+
+    // update
+    g_demo->Animation();
+
+    // draw
+    glViewport(0, 0, width, height);
+    g_app->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
+    glfwSwapBuffers(window);
   }
+
   return 0;
 }
