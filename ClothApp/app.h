@@ -2,7 +2,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // draw cloth function
-class Demo {
+class App {
   // Shader Handles
   class PhongShader *g_phongShader = nullptr; // linked phong shader
 
@@ -19,7 +19,7 @@ public:
   class ProgramInput *g_render_target =
       nullptr; // vertex, normal, texutre, index
 
-  Demo(const struct SystemParam &param);
-  ~Demo();
+  App(const struct SystemParam &param);
+  ~App();
   void drawCloth(const glm::mat4 &proj, const glm::mat4 &view);
 };

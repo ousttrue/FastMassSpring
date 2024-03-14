@@ -2,6 +2,7 @@
 
 #include "UserInteraction.h"
 #include "app.h"
+#include "demo_drop.h"
 #include "demo_hang.h"
 #include "param.h"
 #include <GL/freeglut.h>
@@ -54,8 +55,13 @@ void reshape(int w, int h) {
   updateProjection();
 }
 
-std::shared_ptr<Demo> g_tmp;
-std::shared_ptr<DemoHang> g_demo;
+std::shared_ptr<App> g_app;
+#if 0
+using DEMO = DemoHang;
+#else
+using DEMO = DemoDrop;
+#endif
+std::shared_ptr<DEMO> g_demo;
 
 void mouse(const int button, const int state, const int x, const int y) {
   g_mouseClickX = x;
@@ -85,7 +91,7 @@ void mouse(const int button, const int state, const int x, const int y) {
 
 void display() {
   g_demo->Animation();
-  g_tmp->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
+  g_app->drawCloth(g_ProjectionMatrix, g_ModelViewMatrix);
 }
 
 void motion(const int x, const int y) {
@@ -112,8 +118,9 @@ int main(int argc, char **argv) {
   glutInitWindowSize(g_windowWidth, g_windowHeight);
   glutCreateWindow("Cloth App");
   glewInit();
-  g_tmp = std::make_shared<Demo>(param);
-  g_demo = std::make_shared<DemoHang>(param, g_tmp->g_clothMesh, g_tmp->g_render_target);
+  g_app = std::make_shared<App>(param);
+  g_demo =
+      std::make_shared<DEMO>(param, g_app->g_clothMesh, g_app->g_render_target);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
