@@ -13,7 +13,7 @@ renderer_lib = static_library(
     [
         'Shader.cpp',
         'Vao.cpp',
-        'Mesh.cpp',
+        'MeshBuilder.cpp',
         'app.cpp',
     ],
     dependencies: deps,

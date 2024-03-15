@@ -34,6 +34,7 @@ openmesh_lib = static_library(
     include_directories: openmesh_inc,
     cpp_args: [
         '-D_USE_MATH_DEFINES',
+        '/bigobj',
     ],
 )
 

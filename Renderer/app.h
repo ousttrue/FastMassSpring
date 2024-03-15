@@ -1,6 +1,8 @@
 #pragma once
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
+#include <vector>
 
 // draw cloth function
 class App {
@@ -15,7 +17,8 @@ class App {
 public:
   // Mesh
   // halfedge data structure
-  std::shared_ptr<class Mesh> _mesh;
+  std::shared_ptr<OpenMesh::TriMesh_ArrayKernelT<>> _mesh;
+  std::vector<uint32_t> _indices;
 
   // vertex, normal, texutre, index
   std::shared_ptr<class Vao> _vao;

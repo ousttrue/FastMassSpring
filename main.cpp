@@ -10,13 +10,14 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
-#include "Mesh.h"
+// #include "MeshBuilder.h"
 #include "Shader.h"
 #include "UserInteraction.h"
 #include "Vao.h"
 #include "app.h"
 #include "param.h"
 #include "pickcallback.h"
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 
 std::shared_ptr<App> g_app;
 #if 0
@@ -218,7 +219,9 @@ int main(int argc, char **argv) {
     return c;
   };
 
-  g_demo = std::make_shared<DEMO>(callback, param, g_app->_mesh->vbuff());
+  auto mesh = g_app->_mesh;
+  g_demo = std::make_shared<DEMO>(
+      callback, param, (float *)&mesh->point(*mesh->vertices_begin()));
 
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);

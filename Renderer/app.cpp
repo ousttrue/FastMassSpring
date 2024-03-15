@@ -1,5 +1,5 @@
 #include "app.h"
-#include "Mesh.h"
+#include "MeshBuilder.h"
 #include "Shader.h"
 #include "Vao.h"
 #include "checkerror.h"
@@ -8,14 +8,19 @@
 
 App::App(float w, int n) {
   _material = PhongMaterial::make();
-  _mesh = Mesh::uniformGrid(w, n);
+  auto [m, i] = uniformGrid(w, n);
+  _mesh = m;
+  _indices = i;
 
   // fill program input
   _vao = std::make_shared<Vao>();
-  _vao->setPositionData(_mesh->vbuff(), _mesh->vbuffLen());
-  _vao->setNormalData(_mesh->nbuff(), _mesh->nbuffLen());
-  _vao->setTextureData(_mesh->tbuff(), _mesh->tbuffLen());
-  _vao->setIndexData(_mesh->ibuff(), _mesh->ibuffLen());
+  _vao->bufferData(0, &_mesh->point(*_mesh->vertices_begin()),
+                   _mesh->n_vertices());
+  _vao->bufferData(1, &_mesh->normal(*_mesh->vertices_begin()),
+                   _mesh->n_vertices());
+  _vao->bufferData(2, &_mesh->texcoord2D(*_mesh->vertices_begin()),
+                   _mesh->n_vertices());
+  _vao->setIndexData(_indices.data(), _indices.size());
 
   // check errors
   checkGlErrors();
@@ -24,16 +29,18 @@ App::App(float w, int n) {
 App::~App() { std::cout << "Tmp::~Tmp" << std::endl; }
 
 void App::drawCloth(const glm::mat4 &proj, const glm::mat4 &view) {
+
   // update normals
   _mesh->request_face_normals();
   _mesh->update_normals();
   _mesh->release_face_normals();
 
   // update vertex positions
-  _vao->setPositionData(_mesh->vbuff(), _mesh->vbuffLen());
-
+  _vao->bufferData(0, &_mesh->point(*_mesh->vertices_begin()),
+                   _mesh->n_vertices());
   // update vertex normals
-  _vao->setNormalData(_mesh->nbuff(), _mesh->vbuffLen());
+  _vao->bufferData(1, &_mesh->normal(*_mesh->vertices_begin()),
+                   _mesh->n_vertices());
 
   //
   // render

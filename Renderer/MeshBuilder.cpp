@@ -1,14 +1,14 @@
-#include "Mesh.h"
+#include "MeshBuilder.h"
 
-std::shared_ptr<Mesh> Mesh::uniformGrid(float w, int n) {
-  auto result = std::shared_ptr<Mesh>(new Mesh);
+IndexedBuffer uniformGrid(float w, int n) {
+  auto mesh = std::make_shared<OpenMesh::TriMesh_ArrayKernelT<>>();
   unsigned int ibuffLen = 6 * (n - 1) * (n - 1);
   std::vector<unsigned int> ibuff(ibuffLen);
 
   // request mesh properties
-  result->request_vertex_normals();
-  result->request_vertex_normals();
-  result->request_vertex_texcoords2D();
+  mesh->request_vertex_normals();
+  mesh->request_vertex_normals();
+  mesh->request_vertex_texcoords2D();
 
   // generate mesh
   unsigned int idx = 0;            // vertex index
@@ -27,16 +27,16 @@ std::shared_ptr<Mesh> Mesh::uniformGrid(float w, int n) {
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       handle_table[j + i * n] =
-          result->add_vertex(o + d * j * ux + d * i * uy); // add vertex
-      result->set_texcoord2D(
+          mesh->add_vertex(o + d * j * ux + d * i * uy); // add vertex
+      mesh->set_texcoord2D(
           handle_table[j + i * n],
           OpenMesh::Vec2f(ud * j, ud * i)); // add texture coordinates
 
       // add connectivity
       if (i > 0 && j < n - 1) {
-        result->add_face(handle_table[j + i * n],
-                         handle_table[j + 1 + (i - 1) * n],
-                         handle_table[j + (i - 1) * n]);
+        mesh->add_face(handle_table[j + i * n],
+                       handle_table[j + 1 + (i - 1) * n],
+                       handle_table[j + (i - 1) * n]);
 
         ibuff[idx++] = j + i * n;
         ibuff[idx++] = j + 1 + (i - 1) * n;
@@ -44,8 +44,8 @@ std::shared_ptr<Mesh> Mesh::uniformGrid(float w, int n) {
       }
 
       if (j > 0 && i > 0) {
-        result->add_face(handle_table[j + i * n], handle_table[j + (i - 1) * n],
-                         handle_table[j - 1 + i * n]);
+        mesh->add_face(handle_table[j + i * n], handle_table[j + (i - 1) * n],
+                       handle_table[j - 1 + i * n]);
 
         ibuff[idx++] = j + i * n;
         ibuff[idx++] = j + (i - 1) * n;
@@ -55,12 +55,9 @@ std::shared_ptr<Mesh> Mesh::uniformGrid(float w, int n) {
   }
 
   // calculate normals
-  result->request_face_normals();
-  result->update_normals();
-  result->release_face_normals();
+  mesh->request_face_normals();
+  mesh->update_normals();
+  mesh->release_face_normals();
 
-  // set index buffer
-  result->useIBuff(ibuff);
-
-  return result;
+  return {mesh, ibuff};
 }
