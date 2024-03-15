@@ -1,15 +1,13 @@
 #include "demo_drop.h"
 #include "MassSpringSolver.h"
-#include "Mesh.h"
-#include "Shader.h"
 #include "UserInteraction.h"
 #include "param.h"
 
-DemoDrop::DemoDrop(const SystemParam &param, const std::shared_ptr<Mesh> &mesh,
-                   const std::shared_ptr<class Vao> &vao)
+DemoDrop::DemoDrop(const PickCallback &callback, const SystemParam &param,
+                   float *vbuff)
     : DemoBase(param) {
   // initialize mass spring solver
-  g_solver = std::make_shared<MassSpringSolver>(g_system, mesh->vbuff());
+  g_solver = std::make_shared<MassSpringSolver>(g_system, vbuff);
 
   // sphere collision constraint parameters
   const float radius = 0.64f;             // sphere radius | 0.64f
@@ -22,23 +20,20 @@ DemoDrop::DemoDrop(const SystemParam &param, const std::shared_ptr<Mesh> &mesh,
   // initialize constraints
   // sphere collision constraint
   CgSphereCollisionNode *sphereCollisionNode =
-      new CgSphereCollisionNode(g_system, mesh->vbuff(), radius, center);
+      new CgSphereCollisionNode(g_system, vbuff, radius, center);
 
   // spring deformation constraint
   CgSpringDeformationNode *deformationNode =
-      new CgSpringDeformationNode(g_system, mesh->vbuff(), tauc, deformIter);
+      new CgSpringDeformationNode(g_system, vbuff, tauc, deformIter);
   deformationNode->addSprings(_massSpringBuilder->getShearIndex());
   deformationNode->addSprings(_massSpringBuilder->getStructIndex());
 
   // initialize user interaction
-  auto shader = g_pickShader->shader();
-  g_pickShader->setTessFact(param.n);
-  CgPointFixNode *mouseFixer = new CgPointFixNode(g_system, mesh->vbuff());
-  UI = std::make_shared<GridMeshUI>(g_pickShader->shader(), vao, mouseFixer,
-                                    mesh->vbuff(), param.n);
+  CgPointFixNode *mouseFixer = new CgPointFixNode(g_system, vbuff);
+  UI = std::make_shared<GridMeshUI>(callback, mouseFixer, vbuff, param.n);
 
   // build constraint graph
-  g_cgRootNode = std::make_shared<CgRootNode>(g_system, mesh->vbuff());
+  g_cgRootNode = std::make_shared<CgRootNode>(g_system, vbuff);
 
   // first layer
   g_cgRootNode->addChild(deformationNode);

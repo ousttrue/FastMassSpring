@@ -1,15 +1,13 @@
 #include "demo_hang.h"
 #include "MassSpringSolver.h"
-#include "Mesh.h"
-#include "Shader.h"
 #include "UserInteraction.h"
 #include "param.h"
 
-DemoHang::DemoHang(const SystemParam &param, Mesh *g_clothMesh,
-                   const std::shared_ptr<Vao> &vao)
+DemoHang::DemoHang(const PickCallback &callback, const SystemParam &param,
+                   float *vbuff)
     : DemoBase(param) {
   // initialize mass spring solver
-  g_solver = new MassSpringSolver(g_system, g_clothMesh->vbuff());
+  g_solver = new MassSpringSolver(g_system, vbuff);
 
   // deformation constraint parameters
   const float tauc = 0.4f;            // critical spring deformation | 0.4f
@@ -17,26 +15,22 @@ DemoHang::DemoHang(const SystemParam &param, Mesh *g_clothMesh,
 
   // initialize constraints
   // spring deformation constraint
-  CgSpringDeformationNode *deformationNode = new CgSpringDeformationNode(
-      g_system, g_clothMesh->vbuff(), tauc, deformIter);
+  CgSpringDeformationNode *deformationNode =
+      new CgSpringDeformationNode(g_system, vbuff, tauc, deformIter);
   deformationNode->addSprings(_massSpringBuilder->getShearIndex());
   deformationNode->addSprings(_massSpringBuilder->getStructIndex());
 
   // fix top corners
-  CgPointFixNode *cornerFixer =
-      new CgPointFixNode(g_system, g_clothMesh->vbuff());
+  CgPointFixNode *cornerFixer = new CgPointFixNode(g_system, vbuff);
   cornerFixer->fixPoint(0);
   cornerFixer->fixPoint(param.n - 1);
 
   // initialize user interaction
-  g_pickShader->setTessFact(param.n);
-  CgPointFixNode *mouseFixer =
-      new CgPointFixNode(g_system, g_clothMesh->vbuff());
-  UI = new GridMeshUI(g_pickShader->shader(), vao, mouseFixer,
-                      g_clothMesh->vbuff(), param.n);
+  CgPointFixNode *mouseFixer = new CgPointFixNode(g_system, vbuff);
+  UI = new GridMeshUI(callback, mouseFixer, vbuff, param.n);
 
   // build constraint graph
-  g_cgRootNode = new CgRootNode(g_system, g_clothMesh->vbuff());
+  g_cgRootNode = new CgRootNode(g_system, vbuff);
 
   // first layer
   g_cgRootNode->addChild(deformationNode);

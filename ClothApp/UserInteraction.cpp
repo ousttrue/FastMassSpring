@@ -1,40 +1,19 @@
 #include "UserInteraction.h"
 #include "MassSpringSolver.h"
-#include "Shader.h"
-#include "Vao.h"
-#include <GL/glew.h>
 #include <cmath>
 
-UserInteraction::UserInteraction(const std::shared_ptr<GLProgram> &shader,
-                                 const std::shared_ptr<Vao> &vao,
+UserInteraction::UserInteraction(const PickCallback &callback,
                                  CgPointFixNode *fixer, float *vbuff)
-    : _shader(shader), _vao(vao), i(-1), vbuff(vbuff), fixer(fixer) {}
+    : _callback(callback), i(-1), vbuff(vbuff), fixer(fixer) {}
 
 void UserInteraction::grabPoint(const glm::mat4 &p, const glm::mat4 &mv,
                                 int mouse_x, int mouse_y) {
-  // render scene
-  glClearColor(0, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_FRAMEBUFFER_SRGB);
-
-  _shader->bind();
-  _shader->setModelView(mv);
-  _shader->setProjection(p);
-  _vao->draw();
-  _shader->unbind();
-
-  glFlush();
-
   // read color
-  color c(3);
-  glReadPixels(mouse_x, mouse_y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &c[0]);
+  auto c = _callback(p, mv, mouse_x, mouse_y);
   i = colorToIndex(c);
-  if (i != -1)
+  if (i != -1) {
     fixer->fixPoint(i);
-
-  // return to normal state
-  glClearColor(0.25f, 0.25f, 0.25f, 0);
-  glEnable(GL_FRAMEBUFFER_SRGB);
+  }
 }
 
 void UserInteraction::releasePoint() {
@@ -44,7 +23,7 @@ void UserInteraction::releasePoint() {
   i = -1;
 }
 
-void UserInteraction::movePoint(vec3 v) {
+void UserInteraction::movePoint(const glm::vec3 &v) {
   if (i == -1)
     return;
   fixer->releasePoint(i);
@@ -53,10 +32,9 @@ void UserInteraction::movePoint(vec3 v) {
   fixer->fixPoint(i);
 }
 
-GridMeshUI::GridMeshUI(const std::shared_ptr<GLProgram> &shader,
-                       const std::shared_ptr<Vao> &vao, CgPointFixNode *fixer,
+GridMeshUI::GridMeshUI(const PickCallback &callback, CgPointFixNode *fixer,
                        float *vbuff, unsigned int n)
-    : UserInteraction(shader, vao, fixer, vbuff), n(n) {}
+    : UserInteraction(callback, fixer, vbuff), n(n) {}
 
 int GridMeshUI::colorToIndex(color c) const {
   if (c[2] != 51)

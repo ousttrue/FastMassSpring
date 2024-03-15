@@ -5,6 +5,7 @@ deps = [
     dependency('glm'),
     dependency('gl'),
     cc.find_library('glu32', required: true),
+    dependency('openmesh'),
 ]
 
 renderer_lib = static_library(
@@ -12,6 +13,8 @@ renderer_lib = static_library(
     [
         'Shader.cpp',
         'Vao.cpp',
+        'Mesh.cpp',
+        'app.cpp',
     ],
     dependencies: deps,
 )

@@ -10,9 +10,13 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
+#include "Mesh.h"
+#include "Shader.h"
 #include "UserInteraction.h"
+#include "Vao.h"
 #include "app.h"
 #include "param.h"
+#include "pickcallback.h"
 
 std::shared_ptr<App> g_app;
 #if 0
@@ -183,11 +187,41 @@ int main(int argc, char **argv) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  g_app = std::make_shared<App>(param);
-  g_demo = std::make_shared<DEMO>(param, g_app->_mesh, g_app->_vao);
+  g_app = std::make_shared<App>(param.w, param.n);
 
-  // glfwSetMouseButtonCallback(window, mouse_button_callback);
-  // glfwSetCursorPosCallback(window, cursor_position_callback);
+  auto g_pickShader = PickMaterial::make();
+  g_pickShader->setTessFact(param.n);
+
+  PickCallback callback = [_shader = g_pickShader->shader(),
+                           _vao = g_app->_vao](const glm::mat4 &p,
+                                               const glm::mat4 &mv, int mouse_x,
+                                               int mouse_y) -> color {
+    // render scene
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_FRAMEBUFFER_SRGB);
+
+    _shader->bind();
+    _shader->setModelView(mv);
+    _shader->setProjection(p);
+    _vao->draw();
+    _shader->unbind();
+
+    glFlush();
+    color c(3);
+    glReadPixels(mouse_x, mouse_y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &c[0]);
+
+    // return to normal state
+    glClearColor(0.25f, 0.25f, 0.25f, 0);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    return c;
+  };
+
+  g_demo = std::make_shared<DEMO>(callback, param, g_app->_mesh->vbuff());
+
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
 
   initCamera(param);
   while (!glfwWindowShouldClose(window)) {

@@ -2,7 +2,6 @@
 #include <memory>
 
 struct DemoBase {
-  std::shared_ptr<class PickMaterial> g_pickShader;
   std::shared_ptr<struct mass_spring_system> g_system;
   std::shared_ptr<class MassSpringBuilder> _massSpringBuilder;
 

@@ -3,13 +3,12 @@
 #include "Shader.h"
 #include "Vao.h"
 #include "checkerror.h"
-#include "param.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-App::App(const SystemParam &param) {
+App::App(float w, int n) {
   _material = PhongMaterial::make();
-  _mesh = MeshBuilder::uniformGrid(param.w, param.n);
+  _mesh = MeshBuilder::uniformGrid(w, n);
 
   // fill program input
   _vao = std::make_shared<Vao>();

@@ -1,5 +1,6 @@
 #pragma once
 #include "demo_base.h"
+#include "pickcallback.h"
 #include <memory>
 
 struct DemoDrop : public DemoBase {
@@ -10,9 +11,8 @@ struct DemoDrop : public DemoBase {
   // Constraint Graph
   std::shared_ptr<class CgRootNode> g_cgRootNode;
 
-  DemoDrop(const struct SystemParam &param,
-           const std::shared_ptr<class Mesh> &mesh,
-           const std::shared_ptr<class Vao> &vao);
+  DemoDrop(const PickCallback &callback, const struct SystemParam &param,
+           float *vbuff);
   ~DemoDrop();
   void Animation();
 };

@@ -20,7 +20,7 @@ public:
   // vertex, normal, texutre, index
   std::shared_ptr<class Vao> _vao;
 
-  App(const struct SystemParam &param);
+  App(float w, int n);
   ~App();
   void drawCloth(const glm::mat4 &proj, const glm::mat4 &view);
 };

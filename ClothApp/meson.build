@@ -1,9 +1,7 @@
 cloth_lib = static_library(
     'ClothApp',
     [
-        'app.cpp',
         'MassSpringSolver.cpp',
-        'Mesh.cpp',
         'UserInteraction.cpp',
         'demo_base.cpp',
         'demo_drop.cpp',
@@ -11,9 +9,7 @@ cloth_lib = static_library(
     ],
     dependencies: [
         dependency('glm'),
-        dependency('openmesh'),
         dependency('eigen3'),
-        renderer_dep,
     ],
 )
 
