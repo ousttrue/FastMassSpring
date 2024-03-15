@@ -3,7 +3,6 @@
 
 struct DemoHang : DemoBase {
   // Mass Spring System
-  struct mass_spring_system *g_system = nullptr;
   class MassSpringSolver *g_solver = nullptr;
 
   // User Interaction

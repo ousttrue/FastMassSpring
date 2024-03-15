@@ -27,8 +27,8 @@ DemoDrop::DemoDrop(const SystemParam &param, const std::shared_ptr<Mesh> &mesh,
   // spring deformation constraint
   CgSpringDeformationNode *deformationNode =
       new CgSpringDeformationNode(g_system, mesh->vbuff(), tauc, deformIter);
-  deformationNode->addSprings(massSpringBuilder.getShearIndex());
-  deformationNode->addSprings(massSpringBuilder.getStructIndex());
+  deformationNode->addSprings(_massSpringBuilder->getShearIndex());
+  deformationNode->addSprings(_massSpringBuilder->getStructIndex());
 
   // initialize user interaction
   auto shader = g_pickShader->shader();

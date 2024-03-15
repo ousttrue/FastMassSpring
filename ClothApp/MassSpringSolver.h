@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <vector>
 
-
 // Mass-Spring System struct
 struct mass_spring_system {
   typedef Eigen::SparseMatrix<float> SparseMatrix;
@@ -49,7 +48,7 @@ private:
   typedef std::vector<Triplet> TripletList;
 
   // system
-  mass_spring_system *system;
+  const std::shared_ptr<mass_spring_system> &system;
   Cholesky system_matrix;
 
   // M, L, J matrices
@@ -68,7 +67,8 @@ private:
   void localStep();
 
 public:
-  MassSpringSolver(mass_spring_system *system, float *vbuff);
+  MassSpringSolver(const std::shared_ptr<mass_spring_system> &system,
+                   float *vbuff);
 
   // solve iterations
   void solve(unsigned int n);
@@ -87,7 +87,7 @@ private:
   typedef std::vector<unsigned int> IndexList;
 
   IndexList structI, shearI, bendI;
-  mass_spring_system *result;
+  std::shared_ptr<mass_spring_system> result;
 
 public:
   void uniformGrid(unsigned int n,       // grid width
@@ -100,11 +100,14 @@ public:
   );
 
   // indices
-  IndexList getStructIndex(); // structural springs
-  IndexList getShearIndex();  // shearing springs
-  IndexList getBendIndex();   // bending springs
+  // structural springs
+  MassSpringBuilder::IndexList getStructIndex() { return structI; }
+  // shearing springs
+  MassSpringBuilder::IndexList getShearIndex() { return shearI; }
+  // bending springs
+  MassSpringBuilder::IndexList getBendIndex() { return bendI; }
 
-  mass_spring_system *getResult();
+  std::shared_ptr<mass_spring_system> getResult() { return result; }
 };
 
 // Constraint Graph
@@ -113,11 +116,11 @@ class CgNodeVisitor; // Constraint graph node visitor
 // Constraint graph node
 class CgNode {
 protected:
-  mass_spring_system *system;
+  std::shared_ptr<mass_spring_system> system;
   float *vbuff;
 
 public:
-  CgNode(mass_spring_system *system, float *vbuff);
+  CgNode(const std::shared_ptr<mass_spring_system> &system, float *vbuff);
 
   virtual void satisfy() = 0;                      // satisfy constraint
   virtual bool accept(CgNodeVisitor &visitor) = 0; // accept visitor
@@ -126,7 +129,7 @@ public:
 // point constraint node
 class CgPointNode : public CgNode {
 public:
-  CgPointNode(mass_spring_system *system, float *vbuff);
+  CgPointNode(const std::shared_ptr<mass_spring_system> &system, float *vbuff);
   virtual bool
   query(unsigned int i) const = 0; // check if point with index i is constrained
   virtual bool accept(CgNodeVisitor &visitor);
@@ -139,7 +142,7 @@ protected:
   NodeList children;
 
 public:
-  CgSpringNode(mass_spring_system *system, float *vbuff);
+  CgSpringNode(const std::shared_ptr<mass_spring_system> &system, float *vbuff);
 
   virtual bool accept(CgNodeVisitor &visitor);
   void addChild(CgNode *node);
@@ -149,7 +152,7 @@ public:
 // root node
 class CgRootNode : public CgSpringNode {
 public:
-  CgRootNode(mass_spring_system *system, float *vbuff);
+  CgRootNode(const std::shared_ptr<mass_spring_system> &system, float *vbuff);
 
   virtual void satisfy();
   virtual bool accept(CgNodeVisitor &visitor);
@@ -161,7 +164,8 @@ protected:
   std::unordered_map<unsigned int, Vector3f> fix_map;
 
 public:
-  CgPointFixNode(mass_spring_system *system, float *vbuff);
+  CgPointFixNode(const std::shared_ptr<mass_spring_system> &system,
+                 float *vbuff);
   virtual void satisfy();
 
   virtual bool query(unsigned int i) const;
@@ -180,8 +184,8 @@ private:
   unsigned int n_iter; // number of iterations
 
 public:
-  CgSpringDeformationNode(mass_spring_system *system, float *vbuff, float tauc,
-                          unsigned int n_iter);
+  CgSpringDeformationNode(const std::shared_ptr<mass_spring_system> &system,
+                          float *vbuff, float tauc, unsigned int n_iter);
   virtual void satisfy();
 
   void addSprings(std::vector<unsigned int> springs);
@@ -196,8 +200,8 @@ private:
   Vector3f center;
 
 public:
-  CgSphereCollisionNode(mass_spring_system *system, float *vbuff, float radius,
-                        Vector3f center);
+  CgSphereCollisionNode(const std::shared_ptr<mass_spring_system> &system,
+                        float *vbuff, float radius, Vector3f center);
   virtual bool query(unsigned int i) const;
   virtual void satisfy();
 };

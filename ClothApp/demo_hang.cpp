@@ -19,8 +19,8 @@ DemoHang::DemoHang(const SystemParam &param, Mesh *g_clothMesh,
   // spring deformation constraint
   CgSpringDeformationNode *deformationNode = new CgSpringDeformationNode(
       g_system, g_clothMesh->vbuff(), tauc, deformIter);
-  deformationNode->addSprings(massSpringBuilder.getShearIndex());
-  deformationNode->addSprings(massSpringBuilder.getStructIndex());
+  deformationNode->addSprings(_massSpringBuilder->getShearIndex());
+  deformationNode->addSprings(_massSpringBuilder->getStructIndex());
 
   // fix top corners
   CgPointFixNode *cornerFixer =

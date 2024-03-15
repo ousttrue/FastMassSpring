@@ -1,7 +1,8 @@
 #pragma once
-#include "MassSpringSolver.h"
 #include <glm/common.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
+#include <vector>
 
 class UserInteraction {
 protected:
@@ -11,9 +12,9 @@ protected:
   typedef glm::vec3 vec3;
   typedef std::vector<unsigned char> color;
 
-  int i;                 // index of fixed point
-  float *vbuff;          // vertex buffer
-  CgPointFixNode *fixer; // point fixer
+  int i;                       // index of fixed point
+  float *vbuff;                // vertex buffer
+  class CgPointFixNode *fixer; // point fixer
   virtual int colorToIndex(color c) const = 0;
 
 public:

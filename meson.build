@@ -6,4 +6,17 @@ add_project_arguments(
     language: 'cpp',
 )
 
+subdir('Renderer')
 subdir('ClothApp')
+
+executable(
+    'ClothApp',
+    'main.cpp',
+    install: true,
+    dependencies: [
+        renderer_dep,
+        cloth_dep,
+        dependency('glfw3', default_options: ['install=true']),
+        dependency('imgui', default_options: ['default_library=static']),
+    ],
+)

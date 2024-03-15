@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#define SHADER_DIR "./Renderer/shaders/"
+
 // GLSHADER
 // ///////////////////////////////////////////////////////////////////////////////////
 GLShader::GLShader(GLenum shaderType) : _handle(glCreateShader(shaderType)){};
@@ -91,9 +93,9 @@ void PhongMaterial::setLight(const glm::vec3 &light) {
 }
 
 std::shared_ptr<PhongMaterial> PhongMaterial::make() {
-  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
+  auto ibasic = readall(SHADER_DIR "basic.vshader");
   assert(ibasic.size());
-  auto iphong = readall("./ClothApp/shaders/phong.fshader");
+  auto iphong = readall(SHADER_DIR "phong.fshader");
   assert(iphong.size());
   auto shader = GLProgram::make(ibasic, iphong);
 
@@ -112,9 +114,9 @@ std::shared_ptr<PhongMaterial> PhongMaterial::make() {
 PickMaterial::PickMaterial() {}
 
 std::shared_ptr<PickMaterial> PickMaterial::make() {
-  auto ibasic = readall("./ClothApp/shaders/basic.vshader");
+  auto ibasic = readall(SHADER_DIR "basic.vshader");
   assert(ibasic.size());
-  auto ifrag = readall("./ClothApp/shaders/pick.fshader");
+  auto ifrag = readall(SHADER_DIR "pick.fshader");
   assert(ifrag.size());
   auto shader = GLProgram::make(ibasic, ifrag);
 

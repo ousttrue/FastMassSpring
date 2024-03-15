@@ -1,4 +1,5 @@
 #include "UserInteraction.h"
+#include "MassSpringSolver.h"
 #include "Shader.h"
 #include "Vao.h"
 #include <GL/glew.h>

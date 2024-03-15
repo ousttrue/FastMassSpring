@@ -2,21 +2,10 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "Vao.h"
+#include "checkerror.h"
 #include "param.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <stdexcept>
-#include <string>
-
-static void checkGlErrors() {
-  const GLenum errCode = glGetError();
-  if (errCode != GL_NO_ERROR) {
-    std::string error("GL Error: ");
-    error += reinterpret_cast<const char *>(gluErrorString(errCode));
-    std::cerr << error << std::endl;
-    throw std::runtime_error(error);
-  }
-}
 
 App::App(const SystemParam &param) {
   _material = PhongMaterial::make();
