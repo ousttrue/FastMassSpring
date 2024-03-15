@@ -8,7 +8,7 @@
 
 App::App(float w, int n) {
   _material = PhongMaterial::make();
-  _mesh = MeshBuilder::uniformGrid(w, n);
+  _mesh = Mesh::uniformGrid(w, n);
 
   // fill program input
   _vao = std::make_shared<Vao>();
