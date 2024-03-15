@@ -7,6 +7,7 @@ add_project_arguments(
 )
 
 subdir('Renderer')
+subdir('MassSpringSystem')
 subdir('ClothApp')
 
 executable(

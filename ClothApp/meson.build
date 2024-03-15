@@ -1,15 +1,13 @@
 cloth_lib = static_library(
     'ClothApp',
     [
-        'MassSpringSolver.cpp',
         'UserInteraction.cpp',
         'demo_base.cpp',
         'demo_drop.cpp',
         'demo_hang.cpp',
     ],
     dependencies: [
-        dependency('glm'),
-        dependency('eigen3'),
+        spring_dep,
     ],
 )
 

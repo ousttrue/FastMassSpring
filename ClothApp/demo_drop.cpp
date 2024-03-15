@@ -1,4 +1,6 @@
 #include "demo_drop.h"
+#include "ConstraintGraph.h"
+#include "MassSpringBuilder.h"
 #include "MassSpringSolver.h"
 #include "UserInteraction.h"
 #include "param.h"

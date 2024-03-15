@@ -1,5 +1,5 @@
 #include "UserInteraction.h"
-#include "MassSpringSolver.h"
+#include "ConstraintGraph.h"
 #include <cmath>
 
 UserInteraction::UserInteraction(const PickCallback &callback,

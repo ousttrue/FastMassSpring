@@ -1,4 +1,5 @@
 #include "demo_base.h"
+#include "MassSpringBuilder.h"
 #include "MassSpringSolver.h"
 #include "param.h"
 
